@@ -5,7 +5,7 @@ const decisionSchema = new Schema(
     name: String,
     description: String,
     options: [String],
-    criteria: [String],
+    criteria: [{ name: String, weight: Number, option: String }],
     author: { type: Schema.Types.ObjectId, ref: "User" },
     result: boolean,
     isPublic: boolean,
