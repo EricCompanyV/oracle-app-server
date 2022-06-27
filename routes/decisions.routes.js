@@ -17,17 +17,29 @@ router.post("/decisions/create", isAuthenticated, async (req, res, next) => {
       isPublic,
       author: userId,
     });
-    res.status(201).json({ message: "New beer created", id: decision.id });
+    res.status(201).json({ message: "New decision created", id: decision.id });
   } catch (error) {
+    console.log(error)
     res.status(500).json(error);
   }
 });
+
+router.get("/decisions", isAuthenticated, async (req, res, next) => {
+  try {
+    //filter for only public decisions later
+    const decisions = await Decision.find();
+    res.status(200).json( {message: "Found decisions", decisions})
+  } catch (error) {
+  console.log(error)
+  res.status(500).json(error);
+}})
 
 router.get("/decisions/:id", isAuthenticated, async (req, res, next) => {
   const { id } = req.params;
   try {
     const decision = await Decision.findById(id);
-    res.status(100).json({ message: "Found decision", decision });
+    const commentsOnDecision = await Comment.find({decision: id})
+    res.status(200).json({ message: "Found decision", decision, commentsOnDecision });
   } catch (error) {
     res.status(500).json(error);
   }
@@ -57,15 +69,18 @@ router.put("/decisions/:id", isAuthenticated, async (req, res, next) => {
   }
   try {
     const decision = await Decision.findByIdAndUpdate(id, newDecision);
-
     res.status(200).json({ message: "Decision updated", id });
   } catch (error) {}
 });
 
-router.delete("/:id", isAuthenticated, async (req, res, next) => {
+router.delete("/decisions/:id", isAuthenticated, async (req, res, next) => {
   const { id } = req.params;
   await Decision.findByIdAndDelete(id);
-  const listComments = await Comment.find({})
+  const listComments = await Comment.find({decision: id})
+  listComments.forEach(async(comment)=>{
+    await Comment.findByIdAndDelete(comment)
+  })
+  console.log(listComments)
   
 
   res.status(200).json({ message: "Decision deleted" });
