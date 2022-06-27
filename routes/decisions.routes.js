@@ -1,4 +1,5 @@
 const { isAuthenticated } = require("../middlewares/jwt.middleware");
+const Comment = require("../models/Comment.model");
 const Decision = require("../models/Decision.model");
 
 const router = require("express").Router();
@@ -61,6 +62,13 @@ router.put("/decisions/:id", isAuthenticated, async (req, res, next) => {
   } catch (error) {}
 });
 
-router.post;
+router.delete("/:id", isAuthenticated, async (req, res, next) => {
+  const { id } = req.params;
+  await Decision.findByIdAndDelete(id);
+  const listComments = await Comment.find({})
+  
+
+  res.status(200).json({ message: "Decision deleted" });
+});
 
 module.exports = router;
