@@ -39,13 +39,24 @@ router.get("/decisions/:id",  async (req, res, next) => {
   try {
     const decision = await Decision.findById(id);
     const commentsOnDecision = await Comment.find({decision: id}).populate("author","username")
-
+    console.log("fetching comments")
     console.log(commentsOnDecision)
     res.status(200).json({ message: "Found decision", decision, commentsOnDecision });
   } catch (error) {
     res.status(500).json(error);
   }
 });
+
+router.get("/decisions/user/:userId", isAuthenticated,  async (req, res, next) => {
+    const { userId } = req.params;
+    try {
+        const decisionArray = await Decision.find({author: userId})
+        res.status(200).json({ message: "Found user decisions", decisionArray });
+
+    } catch (error) {
+        
+    }
+})
 
 router.put("/decisions/:id",  async (req, res, next) => {
   const { id } = req.params;
