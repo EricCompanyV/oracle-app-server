@@ -24,7 +24,7 @@ router.post("/decisions/create", isAuthenticated, async (req, res, next) => {
   }
 });
 
-router.get("/decisions", isAuthenticated, async (req, res, next) => {
+router.get("/decisions",  async (req, res, next) => {
   try {
     //filter for only public decisions later
     const decisions = await Decision.find();
@@ -34,18 +34,20 @@ router.get("/decisions", isAuthenticated, async (req, res, next) => {
   res.status(500).json(error);
 }})
 
-router.get("/decisions/:id", isAuthenticated, async (req, res, next) => {
+router.get("/decisions/:id",  async (req, res, next) => {
   const { id } = req.params;
   try {
     const decision = await Decision.findById(id);
-    const commentsOnDecision = await Comment.find({decision: id})
+    const commentsOnDecision = await Comment.find({decision: id}).populate("author","username")
+
+    console.log(commentsOnDecision)
     res.status(200).json({ message: "Found decision", decision, commentsOnDecision });
   } catch (error) {
     res.status(500).json(error);
   }
 });
 
-router.put("/decisions/:id", isAuthenticated, async (req, res, next) => {
+router.put("/decisions/:id",  async (req, res, next) => {
   const { id } = req.params;
   const { name, description, options, criteria, result, isPublic } = req.body;
   const newDecision = {};
@@ -73,12 +75,13 @@ router.put("/decisions/:id", isAuthenticated, async (req, res, next) => {
   } catch (error) {}
 });
 
-router.delete("/decisions/:id", isAuthenticated, async (req, res, next) => {
+router.delete("/decisions/:id",  async (req, res, next) => {
   const { id } = req.params;
+  console.log(req.params)
   await Decision.findByIdAndDelete(id);
   const listComments = await Comment.find({decision: id})
   listComments.forEach(async(comment)=>{
-    await Comment.findByIdAndDelete(comment)
+    await Comment.findByIdAndDelete(comment._id)
   })
   console.log(listComments)
   

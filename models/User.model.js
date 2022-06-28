@@ -7,7 +7,7 @@ const userSchema = new Schema(
       type: String,
       unique: true
     },
-    hashedPassword: String,
+    hashedPassword: String
 
   },
   {
@@ -19,3 +19,4 @@ const userSchema = new Schema(
 const User = model("User", userSchema);
 
 module.exports = User;
+ 
